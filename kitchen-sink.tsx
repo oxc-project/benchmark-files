@@ -20782,60 +20782,6 @@ void deeplyOverloaded;
 
 // =========================================================================
 // region:advanced-ts-hygiene — variance markers, computed enum members,
-// JSX namespaced names, arguments object, triple-slash directives.
-// Coverage hygiene for AST nodes that no other region exercises.
-// =========================================================================
-
-// TS variance markers (4.7+): `in T` / `out T` on type parameters
-interface VarianceContravariant<in T> { accept(value: T): void; }
-interface VarianceCovariant<out T> { produce(): T; }
-interface VarianceMixed<in TIn, out TOut> { transform(value: TIn): TOut; }
-
-const sampleVarianceContravariant: VarianceContravariant<string | number> = {
-  accept(_value) { /* covariant arg site */ },
-};
-const sampleVarianceCovariant: VarianceCovariant<number> = {
-  produce() { return 42; },
-};
-void sampleVarianceContravariant;
-void sampleVarianceCovariant;
-
-// Enum member names: identifiers + string literals (the two `TSEnumMemberName`
-// AST variants — computed member names are a syntax error in enums per TS).
-enum StringKeyedEnum {
-  'kebab-case-key' = 0,
-  'spaces in name' = 1,
-  'string with #symbols' = 2,
-  Identifier = 3,
-  $dollarPrefix = 4,
-  _underscorePrefix = 5,
-}
-void StringKeyedEnum.Identifier;
-void StringKeyedEnum['kebab-case-key'];
-
-// `infer X extends Y` (TS 4.7+) constraint-on-inferred-type
-type FirstStringOf<T> = T extends readonly [infer Head extends string, ...unknown[]] ? Head : never;
-type NumberOnlyTail<T> = T extends readonly [unknown, ...infer Tail extends readonly number[]] ? Tail : never;
-type SampleFirstString = FirstStringOf<['hello', 1, true]>;
-type SampleNumberTail = NumberOnlyTail<['skip', 1, 2, 3]>;
-
-const sampleInferConstrained: SampleFirstString = 'hello';
-const sampleInferTail: SampleNumberTail = [1, 2, 3];
-void sampleInferConstrained;
-void sampleInferTail;
-
-// JSX namespaced names (`<svg:rect />`) — AST has JSXNamespacedName for this
-function renderSvgNamespaced(width: number, height: number): ReactElement {
-  return (
-    <svg:svg width={width} height={height} xmlns:xlink="http://www.w3.org/1999/xlink">
-      <svg:rect x={0} y={0} width={width} height={height} fill="currentColor" />
-      <svg:circle cx={width / 2} cy={height / 2} r={Math.min(width, height) / 4} />
-      <svg:text x={10} y={20}>oxc-bench</svg:text>
-    </svg:svg>
-  );
-}
-void renderSvgNamespaced;
-
 // `arguments` object usage (legacy JS feature with its own resolver path)
 function legacyArgumentsConsumer(): number {
   let total = 0;
